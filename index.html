@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="dark">
+<link rel="icon" href="logo.jpg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+<title>Reconnaissance réseau — HACKSHADOW</title>
+<style>
+:root{--bg:#05080d;--panel:#0c121a;--line:#1b2735;--fg:#e8eef6;--mut:#8797ab;--a:#ff8a1f;--b:#3aa8ff;--ok:#35e08a;--r:#ff5468;--y:#ffc857;--mono:ui-monospace,SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{margin:0;color:var(--fg);font:400 15px/1.65 "Poppins",system-ui,-apple-system,"Segoe UI",sans-serif;background:radial-gradient(620px 320px at 12% 0,rgba(255,138,31,.11),transparent),radial-gradient(620px 320px at 88% 0,rgba(58,168,255,.11),transparent),var(--bg);background-attachment:fixed}
+.wrap{max-width:920px;margin:0 auto;padding:28px 16px 60px}
+.brand{display:flex;align-items:center;gap:16px;margin-bottom:6px}
+.brand img{width:76px;height:auto;border-radius:10px;flex:none}
+h1{font-size:26px;font-weight:700;margin:0;line-height:1.2}
+h2{font-size:17px;font-weight:600;margin:30px 0 10px}
+p{margin:0 0 10px}
+.mut{color:var(--mut)}
+button{font:500 14px "Poppins",system-ui,sans-serif;cursor:pointer;border:1px solid var(--a);background:transparent;color:var(--a);padding:9px 20px;border-radius:6px;transition:background .15s,color .15s}
+button:hover:not(:disabled){background:var(--a);color:#1a0d00}
+button:focus-visible,input:focus-visible{outline:2px solid var(--b);outline-offset:2px}
+button:disabled{opacity:.45;cursor:default}
+.bar{display:flex;align-items:center;gap:14px;flex-wrap:wrap;background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:14px 16px;margin-top:18px}
+.led{width:16px;height:16px;border-radius:50%;background:#2a3645;flex:none}
+.led.wait{background:var(--y);box-shadow:0 0 10px var(--y)}
+.led.on{background:var(--ok);box-shadow:0 0 12px var(--ok)}
+#st{flex:1;min-width:200px}
+#ip{color:var(--a);font-size:18px;font-weight:600}
+.term{background:#03060a;border:1px solid var(--line);border-radius:8px;height:400px;overflow:auto;padding:12px 14px;cursor:text;font:13.5px/1.5 var(--mono)}
+.l{white-space:pre-wrap;word-break:break-word;margin:0}
+.l.err{color:var(--r)}
+.l.sys{color:var(--mut)}
+.pm{color:var(--a)}.pb{color:var(--b)}
+.pr{display:flex;gap:8px;align-items:center}
+#in{flex:1;background:transparent;border:0;color:var(--fg);font:inherit;outline:0;min-width:0}
+.q{display:grid;grid-template-columns:1fr auto;gap:6px 10px;padding:12px 0;border-bottom:1px solid var(--line)}
+.q label{grid-column:1/-1}
+.q input{background:#03060a;border:1px solid var(--line);border-radius:6px;color:var(--fg);font:inherit;padding:8px 10px;min-width:0}
+.res{grid-column:1/-1;min-height:1.6em;font-size:14px}
+.res.ok{color:var(--ok)}.res.ko{color:var(--r)}
+.prog{height:6px;background:var(--line);border-radius:3px;overflow:hidden;margin:6px 0 4px}
+.prog i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--a),var(--b));transition:width .3s}
+#win{position:fixed;inset:0;background:rgba(3,6,10,.84);display:flex;align-items:center;justify-content:center;padding:16px;z-index:10}
+#cv{position:absolute;inset:0;pointer-events:none}
+.card{position:relative;background:var(--panel);border:1px solid var(--a);box-shadow:0 0 40px rgba(255,138,31,.18),0 0 60px rgba(58,168,255,.12);border-radius:10px;padding:28px 26px;max-width:460px;text-align:center}
+.card img{width:84px;border-radius:10px;margin-bottom:10px}
+.card h2{font-size:24px;font-weight:700;margin:0 0 12px}
+#x{position:absolute;top:8px;right:8px;border-color:var(--line);color:var(--mut);padding:2px 10px}
+@media (prefers-reduced-motion:reduce){.prog i,button{transition:none}}
+
+.intro{max-width:620px}
+body.idle .wrap{min-height:100vh;min-height:100svh;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding-top:24px;padding-bottom:24px}
+body.idle .brand{flex-direction:column;gap:16px;margin-bottom:10px}
+body.idle .brand img{width:170px;border-radius:14px;box-shadow:0 0 50px rgba(255,138,31,.22),0 0 70px rgba(58,168,255,.16)}
+body.idle h1{font-size:34px}
+body.idle .bar{width:100%;max-width:560px;justify-content:center;margin-top:14px}
+body.idle #st{flex:none;min-width:0}
+</style>
+</head>
+<body class="idle">
+<main class="wrap">
+  <div class="brand">
+    <img src="logo.jpg" alt="Logo HACKSHADOW">
+    <div><p class="mut" style="margin:0">HACKSHADOW · Atelier reconnaissance réseau</p><h1>La cible silencieuse</h1></div>
+  </div>
+  <p class="intro">Une machine vient d’être mise en ligne. Scanne-la avec <b>nmap</b> depuis le terminal, puis réponds aux questions pour valider le défi.</p>
+
+  <div class="bar">
+    <span class="led" id="led"></span>
+    <span id="st" class="mut">Aucune cible active.</span>
+    <button id="go">Démarrer</button>
+  </div>
+
+  <section id="lab" hidden>
+    <h2>Terminal</h2>
+    <div class="term" id="term">
+      <div id="out"></div>
+      <div class="pr" id="prow"><span><span class="pm">kali@hackshadow</span>:<span class="pb">~</span>$</span><input id="in" autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="Commande"></div>
+    </div>
+
+    <h2>Questions</h2>
+    <div class="prog"><i id="pg"></i></div>
+    <p class="mut" id="pt">0 / 8 réponses validées</p>
+    <div id="qs"></div>
+  </section>
+</main>
+
+<div id="win" hidden>
+  <canvas id="cv"></canvas>
+  <div class="card" role="dialog" aria-modal="true" aria-labelledby="wt">
+    <button id="x" aria-label="Fermer">✕</button>
+    <img src="logo.jpg" alt=""><h2 id="wt">🎉 Félicitations !</h2>
+    <p>Tu as identifié l’adresse, les ports, les services et le système de la cible. Belle reconnaissance.</p>
+    <button id="ok">Fermer</button>
+  </div>
+</div>
+
+<script>
+const $=s=>document.querySelector(s);
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+const r=(a,b)=>Math.floor(Math.random()*(b-a+1))+a;
+const n=s=>s.trim().toLowerCase().replace(/\s+/g," ");
+
+/* Scénarios : h = port caché (visible seulement avec -p- ou -p ciblé) */
+const SC=[
+{os:"Linux",osk:["ubuntu"],run:"Linux 5.X",cpe:"cpe:/o:linux:linux_kernel",det:"Linux 5.4",qa:0,qb:1,qc:2,kc:["apache","2.4.41"],
+ ports:[
+  {p:21,s:"ftp",v:"vsftpd 3.0.3",sc:["ftp-anon: Anonymous FTP login allowed (FTP code 230)","Can’t get directory listing: TIMEOUT"]},
+  {p:22,s:"ssh",v:"OpenSSH 8.2p1 Ubuntu 4ubuntu0.5 (Ubuntu Linux; protocol 2.0)",sc:["ssh-hostkey:","  3072 4c:91:0e:2b:77:a1:5d:3e:90:fa:12:c8:6b:d4:09:e1 (RSA)"]},
+  {p:80,s:"http",v:"Apache httpd 2.4.41 ((Ubuntu))",sc:["http-title: Acme Corp - Intranet","http-server-header: Apache/2.4.41 (Ubuntu)"]},
+  {p:6379,s:"redis",v:"Redis key-value store 5.0.7",h:1}]},
+{os:"Linux",osk:["debian"],run:"Linux 4.X",cpe:"cpe:/o:linux:linux_kernel",det:"Linux 4.19",qa:0,qb:2,qc:1,kc:["nginx","1.14.2"],
+ ports:[
+  {p:22,s:"ssh",v:"OpenSSH 7.9p1 Debian 10+deb10u2 (protocol 2.0)",sc:["ssh-hostkey:","  2048 b3:1f:6a:0d:44:9c:e2:85:71:3a:d0:5f:c9:28:ee:14 (RSA)"]},
+  {p:80,s:"http",v:"nginx 1.14.2",sc:["http-title: Site doesn’t have a title (text/html).","http-server-header: nginx/1.14.2"]},
+  {p:3306,s:"mysql",al:["mariadb"],v:"MySQL 5.5.5-10.3.34-MariaDB-0+deb10u1",sc:["mysql-info:","  Protocol: 10","  Version: 5.5.5-10.3.34-MariaDB-0+deb10u1"]},
+  {p:27017,s:"mongodb",v:"MongoDB 3.6.8",h:1}]},
+{os:"Windows",osk:["2016"],run:"Microsoft Windows 2016",cpe:"cpe:/o:microsoft:windows",det:"Microsoft Windows Server 2016 build 10.0.14393",qa:0,qb:2,qc:4,kc:["httpapi","2.0"],
+ host:["smb-os-discovery:","  OS: Windows Server 2016 Standard 14393 (Windows Server 2016 Standard 6.3)","  Computer name: SRV-FILES01"],
+ ports:[
+  {p:135,s:"msrpc",v:"Microsoft Windows RPC"},
+  {p:139,s:"netbios-ssn",v:"Microsoft Windows netbios-ssn"},
+  {p:445,s:"microsoft-ds",al:["smb"],v:"Windows Server 2016 Standard 14393 microsoft-ds"},
+  {p:3389,s:"ms-wbt-server",al:["rdp"],v:"Microsoft Terminal Services",sc:["rdp-ntlm-info:","  NetBIOS_Computer_Name: SRV-FILES01"]},
+  {p:5985,s:"http",v:"Microsoft HTTPAPI httpd 2.0 (SSDP/UPnP)",h:1}]}
+];
+
+let S=null,ok=0,busy=false,raf=0,qs=[];
+const sv=(p,v)=>v===p.s||(p.al||[]).includes(v);
+function buildQs(){
+  const P=i=>S.ports[S.ports.length&&i];
+  qs=[
+   ["Quelle est l’adresse IP de la cible ?",v=>v===S.ip],
+   ["Combien de ports TCP sont ouverts au total (sur les 65 535) ?",v=>v===String(S.ports.length)],
+   ["Quelle est la famille du système d’exploitation ? (ex. Linux, Windows)",v=>v===S.os.toLowerCase()],
+   ["Quelle distribution Linux, ou quelle version de Windows ?",v=>S.osk.some(k=>v.includes(k))],
+   [`Quel service tourne sur le port ${P(S.qa).p} ?`,v=>sv(P(S.qa),v)],
+   [`Quel service tourne sur le port ${P(S.qb).p} ?`,v=>sv(P(S.qb),v)],
+   [`Quel logiciel et quelle version tournent sur le port ${P(S.qc).p} ?`,v=>S.kc.every(k=>v.includes(k))],
+   ["Quel est le port ouvert le plus élevé ?",v=>v===String(Math.max(...S.ports.map(p=>p.p)))]
+  ];
+}
+function renderQs(){
+  const box=$("#qs");box.innerHTML="";ok=0;upd();
+  qs.forEach(([lab,f],i)=>{
+    const d=document.createElement("div");d.className="q";
+    const l=document.createElement("label");l.textContent=`${i+1}. ${lab}`;l.htmlFor="q"+i;
+    const inp=document.createElement("input");inp.id="q"+i;inp.autocomplete="off";inp.spellcheck=false;
+    const b=document.createElement("button");b.textContent="Valider";
+    const res=document.createElement("div");res.className="res";res.setAttribute("aria-live","polite");
+    const go=()=>{
+      const v=n(inp.value);if(!v)return;
+      if(f(v)){res.className="res ok";res.textContent="✔ Réponse correcte";inp.disabled=true;b.disabled=true;ok++;upd();if(ok===qs.length)setTimeout(win,500)}
+      else{res.className="res ko";res.textContent="✘ Réponse incorrecte"}
+    };
+    b.onclick=go;inp.onkeydown=e=>{if(e.key==="Enter")go()};
+    d.append(l,inp,b,res);box.append(d);
+  });
+}
+function upd(){$("#pg").style.width=(ok/8*100)+"%";$("#pt").textContent=`${ok} / 8 réponses validées`}
+
+/* Terminal */
+const out=$("#out"),term=$("#term"),inp=$("#in");
+function pr(t,c){const d=document.createElement("div");d.className="l "+(c||"");d.textContent=t;out.append(d);term.scrollTop=term.scrollHeight}
+term.onclick=()=>{if(!getSelection().toString())inp.focus()};
+let hist=[],hi=0;
+inp.onkeydown=async e=>{
+  if(e.key==="Enter"){
+    const c=inp.value.trim();inp.value="";if(busy)return;
+    pr(`kali@hackshadow:~$ ${c}`);if(!c)return;hist.push(c);hi=hist.length;await run(c);
+  }else if(e.key==="ArrowUp"){if(hi>0)inp.value=hist[--hi];e.preventDefault()}
+  else if(e.key==="ArrowDown"){inp.value=hi<hist.length-1?hist[++hi]:"";hi=Math.min(hi+1,hist.length);e.preventDefault()}
+};
+async function run(c){
+  const t=c.split(/\s+/),cmd=t[0];
+  if(cmd==="clear"){out.innerHTML="";return}
+  if(cmd==="help"){pr("Commandes disponibles :\n  nmap [options] <ip>   scanner une cible\n  clear                 effacer l’écran\n  help                  cette aide\n\nExemples : nmap -A -O <ip>   |   nmap -sCV -p- -Pn <ip>");return}
+  if(cmd==="nmap"){busy=true;$("#prow").style.visibility="hidden";await nmap(t.slice(1));busy=false;$("#prow").style.visibility="";inp.focus();return}
+  pr(`bash: ${cmd}: command not found`,"err");
+}
+function ports(v){
+  const s=new Set();
+  for(const x of v.split(",")){
+    let m;
+    if(/^\d+$/.test(x)){const k=+x;if(k<1||k>65535)return null;s.add(k)}
+    else if((m=x.match(/^(\d+)-(\d+)$/))){const a=+m[1],b=+m[2];if(a<1||b>65535||a>b)return null;for(let k=a;k<=b;k++)s.add(k)}
+    else return null;
+  }
+  return s;
+}
+function parse(t){
+  const o={A:0,O:0,sC:0,sV:0,pn:0,all:0,set:null,tg:null,err:null};
+  for(let i=0;i<t.length;i++){
+    const a=t[i];
+    if(a==="-A")o.A=1;
+    else if(a==="-O")o.O=1;
+    else if(a==="-Pn")o.pn=1;
+    else if(a==="-p-")o.all=1;
+    else if(a.startsWith("-p")){o.set=ports(a.slice(2)||t[++i]||"");if(!o.set)o.err="Your port specifications are illegal.  Example of proper specifications: -p22,80"}
+    else if(["-oN","-oX","-oG","-oA","--min-rate","--max-retries"].includes(a))i++;
+    else if(/^-s[A-Za-z]+$/.test(a)){if(a.includes("C"))o.sC=1;if(a.includes("V"))o.sV=1}
+    else if(a.startsWith("-"))continue;
+    else o.tg=a;
+  }
+  return o;
+}
+async function emit(L){for(const l of L){pr(l);await sleep(l===""?10:35)}}
+async function nmap(t){
+  const o=parse(t);
+  if(o.err){pr(o.err+"\nQUITTING!","err");return}
+  if(!o.tg){pr("Nmap 7.94SVN ( https://nmap.org )\nUsage: nmap [Scan Type(s)] [Options] {target specification}\nTARGET : indique l’adresse IP de la cible.\n(Exemple : nmap -sV 10.10.1.5)");return}
+  const dt=new Date().toISOString().slice(0,16).replace("T"," ");
+  pr(`Starting Nmap 7.94SVN ( https://nmap.org ) at ${dt} CET`);
+  await sleep(o.all?3500:1500);
+  if(!/^\d{1,3}(\.\d{1,3}){3}$/.test(o.tg)){
+    await emit([`Failed to resolve "${o.tg}".`,"WARNING: No targets were specified, so 0 hosts scanned.","Nmap done: 0 IP addresses (0 hosts up) scanned in 0.05 seconds"]);return}
+  const total=o.set?o.set.size:o.all?65535:1000;
+  if(o.tg!==S.ip){
+    if(!o.pn){await emit(["Note: Host seems down. If it is really up, but blocking our ping probes, try -Pn","Nmap done: 1 IP address (0 hosts up) scanned in 3.04 seconds"]);return}
+    await emit([`Nmap scan report for ${o.tg}`,"Host is up.",`All ${total} scanned ports on ${o.tg} are in ignored states.`,`Not shown: ${total} filtered tcp ports (no-response)`,"","Nmap done: 1 IP address (1 host up) scanned in 6.51 seconds"]);return}
+  const ver=o.sV||o.A,sc=o.sC||o.A,os=o.O||o.A;
+  const vis=S.ports.filter(p=>o.set?o.set.has(p.p):(o.all||!p.h));
+  const L=[`Nmap scan report for ${S.ip}`,`Host is up (0.0${r(10,59)}s latency).`];
+  if(!vis.length)L.push(`All ${total} scanned ports on ${S.ip} are in ignored states.`);
+  if(total-vis.length>0)L.push(`Not shown: ${total-vis.length} closed tcp ports (reset)`);
+  if(vis.length){
+    L.push(("PORT".padEnd(10)+"STATE SERVICE".padEnd(19)+(ver?"VERSION":"")).trimEnd());
+    for(const p of vis){
+      L.push((`${p.p}/tcp`.padEnd(10)+"open  "+p.s.padEnd(14)+(ver?p.v:"")).trimEnd());
+      if(sc&&p.sc)p.sc.forEach((l,i,a)=>L.push((i<a.length-1?"| ":"|_")+l));
+    }
+  }
+  if(sc&&S.host){L.push("","Host script results:");S.host.forEach((l,i,a)=>L.push((i<a.length-1?"| ":"|_")+l))}
+  if(os&&vis.length)L.push("Device type: general purpose","Running: "+S.run,"OS CPE: "+S.cpe,"OS details: "+S.det,"Network Distance: 2 hops");
+  if(ver&&vis.length)L.push(`Service Info: OS: ${S.os}; CPE: ${S.cpe}`);
+  L.push("");
+  if(ver||os)L.push("Service detection performed. Please report any incorrect results at https://nmap.org/submit/ .");
+  L.push(`Nmap done: 1 IP address (1 host up) scanned in ${(o.all?r(1400,3100)/100:r(500,1400)/100).toFixed(2)} seconds`);
+  await emit(L);
+}
+
+/* Démarrage */
+function led(c){$("#led").className="led "+c}
+$("#go").onclick=async()=>{
+  const b=$("#go");b.disabled=true;$("#lab").hidden=true;led("wait");
+  for(let k=4;k>0;k--){$("#st").textContent=`Déploiement de la cible… ${k}`;await sleep(1000)}
+  S=Object.assign({},SC[r(0,SC.length-1)],{ip:`10.10.${r(1,254)}.${r(2,254)}`});
+  buildQs();renderQs();out.innerHTML="";hist=[];
+  led("on");$("#st").innerHTML=`Cible en ligne · <b id="ip">${S.ip}</b>`;
+  $("#lab").hidden=false;document.body.classList.remove("idle");scrollTo(0,0);pr("Cible déployée. Tape help pour voir les commandes.","sys");
+  b.textContent="Nouvelle cible";b.disabled=false;inp.focus();
+};
+
+/* Victoire */
+function win(){
+  $("#win").hidden=false;$("#ok").focus();
+  const c=$("#cv"),x=c.getContext("2d");c.width=innerWidth;c.height=innerHeight;
+  const cols=["#ff8a1f","#3aa8ff","#ffc857","#35e08a","#e8eef6"];
+  const P=Array.from({length:170},()=>({x:Math.random()*c.width,y:-Math.random()*c.height,s:3+Math.random()*5,vy:2+Math.random()*3,vx:Math.random()*2-1,c:cols[r(0,4)],a:Math.random()*6}));
+  cancelAnimationFrame(raf);
+  (function f(){x.clearRect(0,0,c.width,c.height);
+    for(const p of P){p.y+=p.vy;p.x+=p.vx+Math.sin(p.a+=.05);if(p.y>c.height){p.y=-10;p.x=Math.random()*c.width}x.fillStyle=p.c;x.fillRect(p.x,p.y,p.s,p.s*1.6)}
+    raf=requestAnimationFrame(f)})();
+}
+function closeWin(){$("#win").hidden=true;cancelAnimationFrame(raf)}
+$("#x").onclick=closeWin;$("#ok").onclick=closeWin;
+addEventListener("keydown",e=>{if(e.key==="Escape"&&!$("#win").hidden)closeWin()});
+</script>
+</body>
+</html>
